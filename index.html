@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Barcode Generator</title>
+  <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    body {
+      margin: 0;
+      background: #111;
+      color: #eee;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 1rem;
+    }
+    .card {
+      background: #1e1e1e;
+      border-radius: 14px;
+      padding: 2rem;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 0 20px #0f62fe88;
+      text-align: center;
+    }
+    h1 {
+      margin-bottom: 1rem;
+      font-weight: 600;
+      font-size: 1.8rem;
+      color: #0f62fe;
+      letter-spacing: 1.2px;
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      margin-bottom: 1rem;
+      font-size: 1rem;
+      border: 2px solid #0f62fe;
+      border-radius: 8px;
+      background: #121212;
+      color: #eee;
+      outline-offset: 2px;
+      transition: border-color 0.3s ease;
+    }
+    input[type="text"]:focus {
+      border-color: #50a7ff;
+    }
+    button {
+      background-color: #0f62fe;
+      border: none;
+      color: white;
+      font-size: 1.1rem;
+      padding: 0.85rem;
+      border-radius: 10px;
+      cursor: pointer;
+      width: 100%;
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      background-color: #0954c3;
+    }
+    canvas {
+      margin-top: 2rem;
+      background: #fff;
+      border-radius: 10px;
+      width: 100%;
+      height: auto;
+      image-rendering: pixelated;
+    }
+    .label {
+      margin-top: 0.75rem;
+      font-size: 1rem;
+      color: #ccc;
+      font-weight: 600;
+    }
+    .info {
+      margin-top: 0.5rem;
+      font-size: 0.9rem;
+      color: #888;
+    }
+    @media (max-width: 420px) {
+      .card {
+        padding: 1.5rem 1rem;
+      }
+      h1 {
+        font-size: 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <h1>Tesco Generator</h1>
+
+    <input type="text" id="barcodeInput" placeholder="Enter digits only..." />
+    <input type="text" id="labelInput" placeholder="Optional label..." />
+
+    <button onclick="createBarcode()">Generate</button>
+    <div class="info">Changes price to 5p | by CodeHub</div>
+
+    <canvas id="barcodeCanvas" width="800" height="300"></canvas>
+
+    <div id="labelDisplay" class="label"></div>
+
+    <button onclick="downloadImage()" style="margin-top: 1rem;">Download PNG</button>
+  </div>
+
+  <script>
+    function createBarcode() {
+      const input = document.getElementById('barcodeInput').value.trim();
+      const label = document.getElementById('labelInput').value.trim();
+      const canvas = document.getElementById('barcodeCanvas');
+      const ctx = canvas.getContext('2d');
+
+      if (!/^\d+$/.test(input)) {
+        alert("Please enter digits only!");
+        return;
+      }
+
+      const fullCode = '971' + input + '70000507';
+
+      // Reset canvas with white background
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Temp canvas for generating barcode
+      const tempCanvas = document.createElement('canvas');
+      tempCanvas.width = 700;
+      tempCanvas.height = 250;
+
+      JsBarcode(tempCanvas, fullCode, {
+        format: "CODE128",
+        lineColor: "#000",
+        width: 3,
+        height: 150,
+        displayValue: true,
+        font: "Arial",
+        fontSize: 40,
+        margin: 10,
+      });
+
+      // Center barcode
+      const x = (canvas.width - tempCanvas.width) / 2;
+      const y = (canvas.height - tempCanvas.height) / 2;
+      ctx.drawImage(tempCanvas, x, y);
+
+      // Show label separately (not drawn onto canvas)
+      document.getElementById('labelDisplay').textContent = label ? `Product: ${label}` : '';
+    }
+
+    function downloadImage() {
+      const canvas = document.getElementById('barcodeCanvas');
+      const link = document.createElement('a');
+      link.download = 'tesco-barcode.png';
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+    }
+  </script>
+
+</body>
+</html>

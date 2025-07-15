@@ -2,167 +2,199 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Tesco Generator</title>
+  <title>Tesco Barcode Generator</title>
   <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
   <style>
-    * {
-      box-sizing: border-box;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    :root {
+      --tesco-blue: #003478;
+      --tesco-blue-dark: #002a61;
+      --tesco-red: #e31837;
     }
+
     body {
       margin: 0;
-      background: #111;
-      color: #eee;
+      font-family: 'Segoe UI', sans-serif;
+      background: var(--tesco-blue);
+      background-image: linear-gradient(45deg, var(--tesco-blue) 25%, var(--tesco-blue-dark) 25%, var(--tesco-blue-dark) 50%, var(--tesco-blue) 50%, var(--tesco-blue) 75%, var(--tesco-blue-dark) 75%, var(--tesco-blue-dark));
+      background-size: 40px 40px;
+      color: #222;
+      height: 100vh;
       display: flex;
-      justify-content: center;
       align-items: center;
-      min-height: 100vh;
-      padding: 1rem;
+      justify-content: center;
     }
-    .card {
-      background: #1e1e1e;
-      border-radius: 14px;
-      padding: 2rem;
+
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+      max-width: 480px;
       width: 100%;
-      max-width: 400px;
-      box-shadow: 0 0 20px #0f62fe88;
       text-align: center;
     }
+
     h1 {
-      margin-bottom: 1rem;
-      font-weight: 600;
-      font-size: 1.8rem;
-      color: #0f62fe;
-      letter-spacing: 1.2px;
+      font-size: 22px;
+      margin-bottom: 10px;
+      color: var(--tesco-blue-dark);
     }
-    input[type="text"] {
+
+    h2 {
+      font-size: 15px;
+      margin-bottom: 20px;
+      color: var(--tesco-red);
+    }
+
+    input {
       width: 100%;
-      padding: 0.75rem 1rem;
-      margin-bottom: 1rem;
-      font-size: 1rem;
-      border: 2px solid #0f62fe;
-      border-radius: 8px;
-      background: #121212;
-      color: #eee;
-      outline-offset: 2px;
-      transition: border-color 0.3s ease;
+      padding: 12px;
+      font-size: 16px;
+      border: 2px solid var(--tesco-blue);
+      border-radius: 10px;
+      outline: none;
+      margin-bottom: 12px;
+      box-sizing: border-box;
     }
-    input[type="text"]:focus {
-      border-color: #50a7ff;
-    }
+
     button {
-      background-color: #0f62fe;
+      padding: 10px 18px;
+      font-size: 15px;
       border: none;
+      border-radius: 8px;
+      background: var(--tesco-blue);
       color: white;
-      font-size: 1.1rem;
-      padding: 0.85rem;
-      border-radius: 10px;
       cursor: pointer;
-      width: 100%;
-      transition: background-color 0.3s ease;
+      margin: 6px 4px;
+      transition: 0.2s;
     }
+
     button:hover {
-      background-color: #0954c3;
+      background: var(--tesco-blue-dark);
     }
-    canvas {
-      margin-top: 2rem;
-      background: #fff;
+
+    .notice {
+      font-size: 13px;
+      margin-top: 10px;
+      font-weight: bold;
+      color: var(--tesco-red);
+    }
+
+    a.discord {
+      display: block;
+      margin: 8px 0;
+      font-size: 13px;
+      color: var(--tesco-red);
+      text-decoration: none;
+    }
+
+    svg {
+      margin-top: 20px;
+      background: #f2f2f2;
       border-radius: 10px;
-      width: 100%;
-      height: auto;
-      image-rendering: pixelated;
+      padding: 10px;
+      max-width: 100%;
     }
-    .label {
-      margin-top: 0.75rem;
-      font-size: 1rem;
-      color: #ccc;
-      font-weight: 600;
-    }
-    .info {
-      margin-top: 0.5rem;
-      font-size: 0.9rem;
-      color: #888;
-    }
-    @media (max-width: 420px) {
-      .card {
-        padding: 1.5rem 1rem;
-      }
-      h1 {
-        font-size: 1.5rem;
-      }
+
+    #fullCode {
+      margin-top: 8px;
+      font-size: 14px;
+      font-weight: bold;
+      color: var(--tesco-red);
     }
   </style>
 </head>
 <body>
+  <div class="container">
+    <h1>Tesco Barcode Generator</h1>
+    <h2>made by @fck.rqtz</h2>
 
-  <div class="card">
-    <h1>Tesco Generator</h1>
+    <input id="barcodeInput" type="text" placeholder="Enter 13-digit barcode" maxlength="13" />
+    <input id="priceInput" type="text" placeholder="Enter price in pence (e.g. 1 = 1p, 100 = £1)" />
+    <div>
+      <button onclick="generate()">Generate</button>
+      <button onclick="downloadSVG()">Download</button>
+    </div>
 
-    <input type="text" id="barcodeInput" placeholder="Enter digits only..." />
-    <input type="text" id="labelInput" placeholder="Optional label..." />
+    <div class="notice">makes them 5p</div>
+    <a class="discord" href="https://discord.gg/EKBt5CpGdA" target="_blank">Join our Discord</a>
 
-    <button onclick="createBarcode()">Generate</button>
-    <div class="info">Changes price to 5p | by CodeHub</div>
-
-    <canvas id="barcodeCanvas" width="800" height="300"></canvas>
-
-    <div id="labelDisplay" class="label"></div>
-
-    <button onclick="downloadImage()" style="margin-top: 1rem;">Download PNG</button>
+    <svg id="barcode"></svg>
+    <div id="fullCode"></div>
   </div>
 
   <script>
-    function createBarcode() {
-      const input = document.getElementById('barcodeInput').value.trim();
-      const label = document.getElementById('labelInput').value.trim();
-      const canvas = document.getElementById('barcodeCanvas');
-      const ctx = canvas.getContext('2d');
+    function calculateCheckDigit(code) {
+      let digits = code.split('').map(Number);
+      let oddSum = 0;
+      let evenSum = 0;
+      for (let i = 0; i < digits.length; i++) {
+        if ((i + 1) % 2 === 0) {
+          evenSum += digits[i];
+        } else {
+          oddSum += digits[i];
+        }
+      }
+      let total = evenSum + (oddSum * 3);
+      let mod = total % 10;
+      return (10 - mod) % 10;
+    }
 
-      if (!/^\d+$/.test(input)) {
-        alert("Please enter digits only!");
+    function generate() {
+      let rawBarcode = document.getElementById('barcodeInput').value.trim();
+      let rawPrice = document.getElementById('priceInput').value.trim();
+
+      if (!/^\d{13}$/.test(rawBarcode)) {
+        alert("Enter a valid 13-digit barcode.");
         return;
       }
 
-      const fullCode = '971' + input + '70000507';
+      if (!/^\d{1,5}$/.test(rawPrice)) {
+        alert("Enter a valid price in pence (1 to 99999).");
+        return;
+      }
 
-      // Reset canvas with white background
-      ctx.fillStyle = '#fff';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      let formattedPrice = rawPrice.padStart(5, '0');
+      let baseCode = "971" + rawBarcode + "7" + formattedPrice + "0";
+      let checkDigit = calculateCheckDigit(baseCode);
+      let finalCode = baseCode + checkDigit;
 
-      // Temp canvas for generating barcode
-      const tempCanvas = document.createElement('canvas');
-      tempCanvas.width = 700;
-      tempCanvas.height = 250;
-
-      JsBarcode(tempCanvas, fullCode, {
+      JsBarcode("#barcode", finalCode, {
         format: "CODE128",
-        lineColor: "#000",
-        width: 3,
-        height: 150,
         displayValue: true,
-        font: "Arial",
-        fontSize: 40,
-        margin: 10,
+        fontSize: 16,
+        background: "#fff",
+        lineColor: "#000",
+        width: 2,
+        height: 100,
       });
 
-      // Center barcode
-      const x = (canvas.width - tempCanvas.width) / 2;
-      const y = (canvas.height - tempCanvas.height) / 2;
-      ctx.drawImage(tempCanvas, x, y);
-
-      // Show label separately (not drawn onto canvas)
-      document.getElementById('labelDisplay').textContent = label ? `Product: ${label}` : '';
+      document.getElementById('fullCode').innerText = `Full Code: ${finalCode}`;
     }
 
-    function downloadImage() {
-      const canvas = document.getElementById('barcodeCanvas');
-      const link = document.createElement('a');
-      link.download = 'tesco-barcode.png';
-      link.href = canvas.toDataURL("image/png");
-      link.click();
+    function downloadSVG() {
+      const svg = document.getElementById("barcode");
+      const xml = new XMLSerializer().serializeToString(svg);
+      const svg64 = btoa(xml);
+      const imgSrc = 'data:image/svg+xml;base64,' + svg64;
+
+      const image = new Image();
+      image.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = image.width * 3;
+        canvas.height = image.height * 3;
+        const ctx = canvas.getContext('2d');
+        ctx.scale(3, 3);
+        ctx.drawImage(image, 0, 0);
+        const png = canvas.toDataURL("image/png");
+
+        const link = document.createElement('a');
+        link.download = "tesco-barcode.png";
+        link.href = png;
+        link.click();
+      };
+      image.src = imgSrc;
     }
   </script>
-
 </body>
 </html>
